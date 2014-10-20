@@ -1,12 +1,12 @@
-#ifndef IR_Tank_h
-#define IR_Tank_h
+#ifndef IR_LAZER_h
+#define IR_LAZER_h
 #include "IR.h"
 #include <TimerOne.h>
 
-class IRTank : public IR {
+class IRLazer : public IR {
 public:
   // repairRobotValue is set true if the unit is a repair robot
-  IRTank ( int irrcvpin, int irTransmitPin, TimerOne * timer1, bool repairRobotValue) : IR (irrcvpin) {
+  IRLazer ( int irrcvpin, int irTransmitPin, TimerOne * timer1, bool repairRobotValue) : IR (irrcvpin) {
     Timer1 = timer1;
 	fireType = 0;
 	irTransmit = irTransmitPin;

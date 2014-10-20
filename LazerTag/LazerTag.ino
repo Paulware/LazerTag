@@ -1,6 +1,7 @@
 #include <TimerOne.h>
 #include <IR.h>
-#include <IRTank.h>
+#include <IRLazer.h>
+#include <MemoryFree.h>
 
 #define IRRECEIVEPIN 10
 #define IRTRANSMIT 3
@@ -10,7 +11,7 @@
 #define CANNONBUTTON 9
 #define GUNBUTTON 8
 
-IRTank ir (IRRECEIVEPIN, IRTRANSMIT, &Timer1, REPAIRROBOT);
+IRLazer ir (IRRECEIVEPIN, IRTRANSMIT, &Timer1, REPAIRROBOT);
 unsigned long timeout = 0;
 unsigned long fireTimeout = 0;
 boolean irEnable = true;
@@ -38,6 +39,8 @@ void setup()
   digitalWrite (REDLED,1);
   digitalWrite (GREENLED,1);
   timeout = millis() + 750;
+  Serial.print ( "Free Memory: " );
+  Serial.println ( freeMemory() );
 }
 
 void callback() // Timer1 is set to 25 microsecond to balance PWM output
@@ -51,15 +54,14 @@ void callback() // Timer1 is set to 25 microsecond to balance PWM output
 }
 
 /*
-   Simulator the firing of the main cannon of the huan qi battle tank
-   void IRTank::sendFirePulse(void) will be called 
 */
-void fireHuanQi (int fireType) {
-  ir.fireType = fireType + 1; // Huan Qi Cannon = FireType 4, Gun = 6 
+void fireLazer () {
+  irEnable = false;
+  ir.fireType = 1;
+  Serial.println ( "Calling fireAll" );
   ir.fireAll ();
-  Serial.print ( "fireType: " );
-  Serial.println ( ir.fireType );
   digitalWrite (GREENLED,0);
+  irEnable = true;
 }
 
 int lastCannon = 0;
@@ -102,9 +104,9 @@ void loop () {
   if (fireTimeout) 
     if (millis() > fireTimeout) {
         // Allow time for each individual fire sequence.
-        //fireHuanQi (4);
+        fireLazer ();
         fireTimeout = 0; // Done
-        //Serial.print ( "Done" );
+        Serial.print ( "Done Firing" );
       }  
     
   
