@@ -55,12 +55,14 @@ void callback() // Timer1 is set to 25 microsecond to balance PWM output
 
 /*
 */
+int greenOut = 1;
 void fireLazer () {
   irEnable = false;
-  ir.fireType = 1;
+  ir.fireType = 0;
   Serial.println ( "Calling fireAll" );
   ir.fireAll ();
-  digitalWrite (GREENLED,0);
+  greenOut = 1 - greenOut;
+  digitalWrite (GREENLED,greenOut);
   irEnable = true;
 }
 
@@ -96,7 +98,7 @@ void loop () {
        timeout = 0;
        digitalWrite (REDLED,0);
        digitalWrite (GREENLED,0);
-       fireTimeout = 1; // Set to non-zero so code will trigger below
+       fireTimeout = 2; // Set to non-zero so code will trigger below
        digitalWrite (GREENLED,1);
     }
   }
@@ -105,7 +107,7 @@ void loop () {
     if (millis() > fireTimeout) {
         // Allow time for each individual fire sequence.
         fireLazer ();
-        fireTimeout = 0; // Done
+        fireTimeout = millis() + 2000; // Done
         Serial.print ( "Done Firing" );
       }  
     
