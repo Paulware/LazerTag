@@ -56,10 +56,13 @@ void callback() // Timer1 is set to 25 microsecond to balance PWM output
 /*
 */
 int greenOut = 1;
-void fireLazer () {
+void fireLazer (int which) {
   irEnable = false;
-  ir.fireType = 0;
-  Serial.println ( "Calling fireAll" );
+  ir.fireType = which; // 0 = normal pulse, 1 = heal
+  if (which == 0)
+     Serial.println ( "Fire gun!" );
+  else
+     Serial.println ( "Heal!" );
   ir.fireAll ();
   greenOut = 1 - greenOut;
   digitalWrite (GREENLED,greenOut);
@@ -74,7 +77,7 @@ void loop () {
   {
     lastCannon = value;
     if (!value) {
-       Serial.println ( "Fire!" );
+       fireLazer (0);
        delay (300);
     }
   }
@@ -84,7 +87,7 @@ void loop () {
   {
     lastGun = value;
     if (!value) {
-       Serial.println ( "Fire!" );
+       fireLazer (1);
        delay (300);
     }
   }
@@ -106,8 +109,8 @@ void loop () {
   if (fireTimeout) 
     if (millis() > fireTimeout) {
         // Allow time for each individual fire sequence.
-        fireLazer ();
-        fireTimeout = millis() + 2000; // Done
+        fireLazer (0);
+        fireTimeout = 0; // millis() + 2000; // Done
         Serial.print ( "Done Firing" );
       }  
     
