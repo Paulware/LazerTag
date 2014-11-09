@@ -6,3 +6,11 @@
     Ready for reorder (not urgent)
     To assemble, shift LD part one pin, unused pin goes to first pin(VCC)
     
+11/6/2014
+    16 mhz clock and 10k resistor moved to top of pcb so that the unit 
+    can be glued to a flat surface.  Added standoff holes .
+    
+11/7/2014
+    Added 8 and 6 pin headers in case this could be used like a DIY Arduino.  Moved
+    standoffs more to the corner.
+    

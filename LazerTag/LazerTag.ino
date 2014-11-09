@@ -12,7 +12,8 @@
 #define GUNBUTTON 8
 
 IRLazer ir (IRRECEIVEPIN, IRTRANSMIT, &Timer1, REPAIRROBOT);
-unsigned long timeout = 0;
+unsigned long redTimeout = 0;
+unsigned long greenTimeout = 0;
 unsigned long fireTimeout = 0;
 boolean irEnable = true;
 unsigned long irTimeout = 0;
@@ -38,7 +39,9 @@ void setup()
   Serial.println ( "Ready" );
   digitalWrite (REDLED,1);
   digitalWrite (GREENLED,1);
-  timeout = millis() + 750;
+  redTimeout = millis() + 1000;
+  greenTimeout = millis() + 1000;
+  
   Serial.print ( "Free Memory: " );
   Serial.println ( freeMemory() );
 }
@@ -53,19 +56,12 @@ void callback() // Timer1 is set to 25 microsecond to balance PWM output
   }  
 }
 
-/*
-*/
-int greenOut = 1;
 void fireLazer (int which) {
   irEnable = false;
   ir.fireType = which; // 0 = normal pulse, 1 = heal
-  if (which == 0)
-     Serial.println ( "Fire gun!" );
-  else
-     Serial.println ( "Heal!" );
   ir.fireAll ();
-  greenOut = 1 - greenOut;
-  digitalWrite (GREENLED,greenOut);
+  digitalWrite (GREENLED,1);
+  greenTimeout = millis() + 500;
   irEnable = true;
 }
 
@@ -78,6 +74,7 @@ void loop () {
     lastCannon = value;
     if (!value) {
        fireLazer (0);
+       Serial.println ( "Fire lazer gun" );
        delay (300);
     }
   }
@@ -88,6 +85,7 @@ void loop () {
     lastGun = value;
     if (!value) {
        fireLazer (1);
+       Serial.println ( "Heal" );
        delay (300);
     }
   }
@@ -96,41 +94,24 @@ void loop () {
     
   static int redGreen = 0;
   
-  if (timeout > 0) {
-    if (millis() > timeout) {
-       timeout = 0;
-       digitalWrite (REDLED,0);
-       digitalWrite (GREENLED,0);
-       fireTimeout = 2; // Set to non-zero so code will trigger below
-       digitalWrite (GREENLED,1);
-    }
-  }
-  
-  if (fireTimeout) 
-    if (millis() > fireTimeout) {
-        // Allow time for each individual fire sequence.
-        fireLazer (0);
-        fireTimeout = 0; // millis() + 2000; // Done
-        Serial.print ( "Done Firing" );
-      }  
+  if (redTimeout > 0)
+     if (millis() > redTimeout) {
+        digitalWrite (REDLED, 0);
+        redTimeout = 0;
+     }  
     
+  if (greenTimeout > 0) 
+     if (millis() > greenTimeout) {
+       digitalWrite (GREENLED, 0);
+       greenTimeout = 0;
+     }  
   
   if (irDetected ==  -1) {
      Serial.println ( "Got something" );
-     redGreen = 1 - redGreen;
-     if (redGreen == 0)
-     {
-       digitalWrite (REDLED,1);
-       digitalWrite (GREENLED,0);
-     }
-     else 
-     {
-       digitalWrite (REDLED,0);
-       digitalWrite (GREENLED,1);       
-     }
+     digitalWrite (REDLED, 1);
+     redTimeout = millis() + 500;
      irEnable = false;
      ir.resetIR(); 
-     delay (1000);
      irEnable = true;  
   }
   else if (millis() > irTimeout) {

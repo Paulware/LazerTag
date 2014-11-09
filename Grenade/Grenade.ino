@@ -10,15 +10,14 @@
 IRLazer ir (IRRECEIVEPIN, IRTRANSMIT, &Timer1, REPAIRROBOT);
 unsigned long timeout = 0;
 unsigned long fireTimeout = 0;
-boolean irEnable = true;
-unsigned long irTimeout = 0;
+unsigned long ceaseFire = 0;
 
 void setup() {
   ir.init(); 
   
-  pinMode (5,INPUT);
-  pinMode (3,OUTPUT);
-  pinMode (6,OUTPUT);
+  pinMode (5,INPUT);  // Switch input
+  pinMode (3,OUTPUT); // IR Tx
+  pinMode (6,OUTPUT); // Sound module go
   digitalWrite (5,1); // pull-up internal resistor
   Serial.begin (115200);
   Serial.println ( "Ready" );
@@ -32,9 +31,8 @@ void fireLazer () {
 
 void explode() {
   digitalWrite (6,1);
-  delay (500);
+  delay (400);
   digitalWrite (6,0);
-  fireTimeout = millis() + 4200;
 }
 int lastButton = 1;
 void loop () {
@@ -44,15 +42,20 @@ void loop () {
     if (value == 0)
     {
        Serial.println ( "button pushed" );
+       fireTimeout = millis() + 1000;
+       ceaseFire = millis() + 6000;  // Fire for six seconds
        explode();
     }   
-    delay (100);
   }
   
   if (fireTimeout > 0) {
     if (millis() > fireTimeout) {
+      fireLazer();      
+      fireTimeout = millis() + 400;
+    }
+    if (millis() > ceaseFire) {
+      ceaseFire = 0;
       fireTimeout = 0;
-      fireLazer();
     }
   }
 }
